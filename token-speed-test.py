@@ -14,7 +14,7 @@ import sys
 BASE_URL = "http://127.0.0.1:8080/v1/chat/completions"
 MODEL = "Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf"
 PROMPT = "Count from 1 to 50. Write a detailed analysis of each number's significance in military strategy."
-TOKEN_LENGTHS=*** 256, 512, 1024, 2048]
+TOKEN_LENGTHS=[128, 256, 512, 1024, 2048]
 
 def benchmark(max_tokens):
     payload = {
