@@ -1,0 +1,57 @@
+# llama.cpp server — systemd unit for running a local LLM as an
+# OpenAI-compatible API on the home PC.
+#
+# Install:
+#   sudo cp llama-server.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now llama-server
+#
+# Note: adjust -m path and model name to the model you are serving.
+# The Hermes config points at this endpoint; a restart drops the
+# agent for ~30-60 seconds while the model reloads into VRAM.
+
+[Unit]
+Description=llama-server
+After=network.target
+
+[Service]
+User=joshua
+WorkingDirectory=/home/joshua/llama.cpp/build
+ExecStart=/home/joshua/llama.cpp/build/bin/llama-server \
+  -m /home/joshua/llama.cpp/models/Qwen3.8-27B-UD-Q4_K_XL-GGUF/Qwen3.8-27B-UD-Q4_K_XL.gguf \
+  --host 0.0.0.0 \
+  --port 8080 \
+  --ctx-size 163840 \
+  --swa-full \
+  --n-gpu-layers all \
+  --device CUDA0 \
+  --main-gpu 0 \
+  --threads 16 \
+  --threads-batch 16 \
+  --threads-http 4 \
+  --batch-size 2048 \
+  --ubatch-size 2048 \
+  --cont-batching \
+  --parallel 1 \
+  --flash-attn on \
+  --spec-type draft-mtp \
+  --spec-draft-n-max 6 \
+  --spec-draft-n-min 0 \
+  --jinja \
+  --cache-type-k q8_0 \
+  --cache-type-v q8_0 \
+  --top-k 20 \
+  --top-p 0.95 \
+  --min-p 0.00 \
+  --temp 1 \
+  --repeat-penalty 1 \
+  --no-mmproj-offload \
+  --reasoning auto \
+  --reasoning-preserve \
+  --chat-template-kwargs '{"preserve_thinking":true,"reasoning_effort":"medium"}' \
+  --sleep-idle-seconds 300
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
