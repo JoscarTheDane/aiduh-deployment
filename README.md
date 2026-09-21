@@ -10,6 +10,44 @@ moves between machines; the LLM server stays put. The agent is a
 **client** of the model, not its host — which is what makes a phone or a
 tablet viable as an always-on agent platform.
 
+## How it is deployed
+
+```mermaid
+flowchart TD
+    subgraph HOSTS["Three generations of host — the brain moved each time"]
+        H1["RTX 5090 rig"]
+        H2["Samsung phone, Termux"]
+        H3["Windows 11 tablet — current"]
+    end
+
+    subgraph BRAIN["The brain — what moves"]
+        B1["memory"]
+        B2["skills"]
+        B3["cron fleet"]
+        B4["config and sessions"]
+    end
+
+    subgraph MODEL["The model — what stays put"]
+        M1["llama.cpp llama-server<br/>systemd unit, port 8080<br/>OpenAI-compatible /v1"]
+        M2["Qwen3.8-27B UD-Q4_K_XL<br/>MTP speculative decoding<br/>q8_0 KV cache · 163,840 ctx"]
+    end
+
+    H1 -->|"agent client"| M1
+    H2 -->|"agent client"| M1
+    H3 -->|"agent client"| M1
+    M1 --> M2
+
+    style H3 fill:#1f5f3a,color:#fff
+    style M1 fill:#1f3a5f,color:#fff
+```
+
+The split is the point. Because the agent is a **client** of the model rather than its host, the
+brain can live on a phone or a tablet while a 17.9 GB model stays on the GPU machine — which is what
+makes an always-on agent viable on hardware that could never run the model itself.
+
+Restart discipline is in the repo too: `verify.sh` for post-restart health checks, and
+`benchmark_tps.sh` to confirm the server came back at expected speed rather than merely answering.
+
 ## What's in this repo
 
 | File | Purpose |
